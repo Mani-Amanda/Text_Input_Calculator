@@ -97,6 +97,64 @@ string infixToPostfix(const string& infix) {
 
     return postfix;
 }
+
+double evaluatePostfix(const string& postfix) {
+    stack<double> operandStack;
+    if (postfix == "") {
+       return -1  ;
+    }
+
+    istringstream iss(postfix);
+    string token;
+
+    while (iss >> token) {
+        if (isdigit(token[0])) {
+            double operand = stod(token);
+            operandStack.push(operand);
+        }
+        else if (isOperator(token[0])) {
+            if (operandStack.size() < 2) {
+                return -1;
+            }
+            double operand2 = operandStack.top();
+            operandStack.pop();
+            double operand1 = operandStack.top();
+            operandStack.pop();
+            switch (token[0]) {
+            case '+':
+                operandStack.push(operand1 + operand2);
+                break;
+            case '-':
+                operandStack.push(operand1 - operand2);
+                break;
+            case '*':
+                operandStack.push(operand1 * operand2);
+                break;
+            case '/':
+                if (operand2 != 0) {
+                    operandStack.push(operand1 / operand2);
+                }
+                else {
+                    return -1;
+                }
+                break;
+            default:
+                return -1;
+            }
+        }
+        else {
+            return -1;
+            
+        }
+    }
+
+    if (operandStack.size() == 1) {
+        return operandStack.top();
+    }
+    else {
+        return -1;
+    }
+}
 int main() {
     ifstream inputFile("formulas.txt");
 
@@ -118,10 +176,14 @@ int main() {
         getline(inputFile, formula);
         outputFile<< formula << "=";
         string postFix = infixToPostfix(formula);
+        double result = evaluatePostfix(postFix);
+        outputFile<< fixed << setprecision(2) << result << endl;
     }
     
 
     inputFile.close();
+    outputFile.close();
+
 
 
     return 0;
